@@ -1,0 +1,29 @@
+{
+  "name": "@libertypie/erc20-balance-history",
+  "version": "1.0.0",
+  "description": "get user balance average since x days, hours or hours, this enable you to get user holding balance for a particular time",
+  "main": "main.js",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "ethers": "^5.1.4",
+    "md5": "^2.3.0",
+    "moment": "^2.29.1",
+    "node-cache": "^5.1.2",
+    "node-file-cache": "^1.0.2",
+    "sleep": "^6.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "@big-zak",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LibertyPie/erc20-balance-history.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LibertyPie/erc20-balance-history/issues"
+  },
+  "homepage": "https://github.com/LibertyPie/erc20-balance-history#readme"
+}
