@@ -1,6 +1,6 @@
 {
   "name": "@libertypie/erc20-balance-history",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "get user balance average since x days, hours or hours, this enable you to get user holding balance for a particular time",
   "main": "main.js",
   "dependencies": {
