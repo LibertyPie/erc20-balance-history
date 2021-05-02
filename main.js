@@ -19,11 +19,6 @@ const abi = [
 
 module.exports = class Balance {
 
-   static balancesArray = [];
-
-   static tokenDecimals = {};
-
-   static etherscanApiKey;
 
     static async getBalanceHistory({
         contractAddress,
@@ -42,12 +37,10 @@ module.exports = class Balance {
             return cachedData;
         }
 
-        this.etherscanApiKey = etherscanApiKey;
-
         const provider = new ethers.providers.JsonRpcProvider(providerUrl);
 
         //lets get the data 
-        let blockNo = await this.timestampToBlock(timestampInSecs)
+        let blockNo = await this.timestampToBlock(timestampInSecs, etherscanApiKey)
 
         if(blockNo.length == 0){
             throw new Error(`Failed to retrieve blockNo for timestamp ${timestampInSecs}`)
@@ -76,6 +69,77 @@ module.exports = class Balance {
         return balance;
     }
 
+    static async getBalanceSinceXDays(daysBack,{
+        contractAddress,
+        userAddress,
+        etherscanApiKey,
+        providerUrl
+    }) {
+
+        return this.getBalanceSinceXTime({
+            contractAddress,
+            userAddress,
+            timeMode: "days",
+            timeBack: daysBack,
+            etherscanApiKey,
+            providerUrl
+        });
+    }
+
+    static async getBalanceSinceXHours(hoursBack,{
+        contractAddress,
+        userAddress,
+        etherscanApiKey,
+        providerUrl
+    }) {
+
+        return this.getBalanceSinceXTime({
+            contractAddress,
+            userAddress,
+            timeMode: "hours",
+            timeBack: hoursBack,
+            etherscanApiKey,
+            providerUrl
+        });
+    }
+
+
+    static async getBalanceSinceXMonths(monthsBack,{
+        contractAddress,
+        userAddress,
+        etherscanApiKey,
+        providerUrl
+    }) {
+
+        return this.getBalanceSinceXTime({
+            contractAddress,
+            userAddress,
+            timeMode: "months",
+            timeBack: monthsBack,
+            etherscanApiKey,
+            providerUrl
+        });
+    }
+
+
+    static async getBalanceSinceXYears(yearsBack,{
+        contractAddress,
+        userAddress,
+        etherscanApiKey,
+        providerUrl
+    }) {
+
+        return this.getBalanceSinceXTime({
+            contractAddress,
+            userAddress,
+            timeMode: "years",
+            timeBack: yearsBack,
+            etherscanApiKey,
+            providerUrl
+        });
+    }
+
+
     static async getBalanceSinceXTime({
         contractAddress,
         userAddress,
@@ -91,20 +155,56 @@ module.exports = class Balance {
             throw new Error(`unknown timeMode ${timeMode}, supported are: ${JSON.stringify(supportedTimeMode)}`)
         }
 
-        let balances = []
+        let balancesArray = []
+        let balanceSum = 0;
+        let totalHistory = 0;
 
         //lets loop and get the timestaps
         for(let i = 0; i <= timeBack; i++){
             
-            let curTime = moment().subtract(i, timeMode).endOf(timeMode).unix()
+            let _timestamp = moment().subtract(i, timeMode)
 
-            console.log(curTime)
+            //if 0, means current time, which mean the timeMode has not ended
+            _timestamp = (i == 0) ? _timestamp = _timestamp.unix() : _timestamp.endOf(timeMode).unix();
+            
+            //lets mow get balance history
+            let balance = await this.getBalanceHistory({
+                contractAddress,
+                userAddress,
+                timestampInSecs: _timestamp,
+                etherscanApiKey,
+                providerUrl
+            })
 
+            balancesArray.push({
+                timestamp: _timestamp,
+                balance
+            })
+
+            balanceSum += balance;
+
+            totalHistory++;
+
+            sleep.msleep(200)
         }
-    }
+
+        if((totalHistory -1) != timeBack) {
+            throw new Error("Failed to retrieve all balance history, kindly retry again")
+        }
+
+        //lets now find the average balance
+        let averageBalance = (balanceSum / timeBack); 
+
+        let result = {
+            averageBalance,
+            balances: balancesArray
+        }
+
+        return Promise.resolve(result)
+    } //end fun
 
 
-    static async timestampToBlock(timestamp){
+    static async timestampToBlock(timestamp, etherscanApiKey){
         
         let cacheKey = `tsBlock_${timestamp}`
 
@@ -114,7 +214,7 @@ module.exports = class Balance {
             return cachedData
         }
 
-        const etherscanAPIEndpoint = `https://api.etherscan.io/api?module=block&action=getblocknobytime&timestamp=${timestamp}&closest=before&apikey=${this.etherscanApiKey}`;
+        const etherscanAPIEndpoint = `https://api.etherscan.io/api?module=block&action=getblocknobytime&timestamp=${timestamp}&closest=before&apikey=${etherscanApiKey}`;
 
         let blockNoInfo = await this.httpRequest(etherscanAPIEndpoint)
 
