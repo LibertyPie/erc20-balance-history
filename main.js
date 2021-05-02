@@ -199,7 +199,7 @@ module.exports = class Balance {
         }
 
         //lets now find the average balance
-        let averageBalance = (balanceSum / timeBack); 
+        let averageBalance = (balanceSum / totalHistory); 
 
         let result = {
             averageBalance,
