@@ -79,7 +79,8 @@ module.exports = class Balance {
         contractAddress,
         userAddress,
         etherscanApiKey,
-        providerUrl
+        providerUrl,
+        currentTime
     }) {
 
         return this.getBalanceSinceXTime({
@@ -88,7 +89,8 @@ module.exports = class Balance {
             timeMode: "days",
             timeBack: daysBack,
             etherscanApiKey,
-            providerUrl
+            providerUrl,
+            currentTime
         });
     }
 
@@ -96,7 +98,8 @@ module.exports = class Balance {
         contractAddress,
         userAddress,
         etherscanApiKey,
-        providerUrl
+        providerUrl,
+        currentTime
     }) {
 
         return this.getBalanceSinceXTime({
@@ -105,7 +108,8 @@ module.exports = class Balance {
             timeMode: "hours",
             timeBack: hoursBack,
             etherscanApiKey,
-            providerUrl
+            providerUrl,
+            currentTime
         });
     }
 
@@ -114,7 +118,8 @@ module.exports = class Balance {
         contractAddress,
         userAddress,
         etherscanApiKey,
-        providerUrl
+        providerUrl,
+        currentTime
     }) {
 
         return this.getBalanceSinceXTime({
@@ -123,7 +128,8 @@ module.exports = class Balance {
             timeMode: "months",
             timeBack: monthsBack,
             etherscanApiKey,
-            providerUrl
+            providerUrl,
+            currentTime
         });
     }
 
@@ -132,7 +138,8 @@ module.exports = class Balance {
         contractAddress,
         userAddress,
         etherscanApiKey,
-        providerUrl
+        providerUrl,
+        currentTime
     }) {
 
         return this.getBalanceSinceXTime({
@@ -141,7 +148,8 @@ module.exports = class Balance {
             timeMode: "years",
             timeBack: yearsBack,
             etherscanApiKey,
-            providerUrl
+            providerUrl,
+            currentTime
         });
     }
 
@@ -152,8 +160,18 @@ module.exports = class Balance {
         timeMode,
         timeBack,
         etherscanApiKey,
-        providerUrl
+        providerUrl,
+        currentTime
     }) {    
+
+
+        if(currentTime){
+            if(!moment.isMoment(currentTime)){
+                throw new Error(`invalid currentTime value, must be an instance of momentjs, example  let currentTime = moment();`)
+            } else {
+                currentTime = moment()
+            }
+        }
 
         let supportedTimeMode = ['hours','days','months','years']
 
@@ -165,10 +183,12 @@ module.exports = class Balance {
         let balanceSum = 0;
         let totalHistory = 0;
 
+        
+
         //lets loop and get the timestaps
         for(let i = 0; i <= timeBack; i++){
             
-            let _timestamp = moment().subtract(i, timeMode)
+            let _timestamp = currentTime.subtract(i, timeMode)
 
             //if 0, means current time, which mean the timeMode has not ended
             _timestamp = (i == 0) ? _timestamp = _timestamp.unix() : _timestamp.endOf(timeMode).unix();
