@@ -1,3 +1,9 @@
+/**
+ * LibertyPie (https://libertypie.com)
+ * @author LibertyPie <hello@libertypie.com>
+ * @license MIT
+ */
+ 
 const ethers = require('ethers');
 const axios = require('axios');
 const sleep = require("sleep")
